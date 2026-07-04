@@ -1,0 +1,18 @@
+# Dependencies
+**/node_modules/
+**/.venv/
+**/__pycache__/
+*.pyc
+
+# Environment Secrets & Databases
+**/.env
+**/*.db
+**/*.db-journal
+
+# Editor and System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+uploads/

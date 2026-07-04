@@ -1,0 +1,17 @@
+{
+  "short_name": "VaxiPredict",
+  "name": "VaxiPredict — Vaccine Hesitancy Prediction System",
+  "description": "Spatial-Temporal Vaccination Analytics & Misinformation Audit Platform",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#090e1a",
+  "theme_color": "#0d0a24",
+  "display": "standalone",
+  "orientation": "portrait"
+}
