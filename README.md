@@ -29,61 +29,6 @@
 
 ---
 
-## 🧠 AI Components
-
-### 1. Hybrid GNN + LSTM Model
-Predicts regional vaccine hesitancy by combining:
-*   **Graph Neural Network (GNN):** Stacks graph layers to propagate hesitancy risks and compute spatial influence across borders:
-    \[Z^{(l+1)} = \sigma(\tilde{A} Z^{(l)} W)\]
-*   **LSTM:** Standard recurrent cells that process historical sequences `[doses_administered, hesitancy_rate, misinformation_index]` per period.
-
-**Outputs:**
-*   `Hesitancy score` (float `[0.0, 1.0]`)
-*   `Prediction confidence` (float `[0.0, 1.0]`)
-
-### 2. AI Health Assistant
-Powered by **Google Gemini 2.5 Flash**, the intelligent assistant is capable of:
-*   Answering platform-related questions.
-*   Summarizing vaccination trends.
-*   Explaining analytics and dashboard metrics.
-*   Supporting health workers on field visits with contextual insights.
-
-### 3. Vaccine Fact Checker
-Allows users to verify vaccine-related claims and receive structured reports containing:
-*   `Misinformation score` (veracity health audit rating, e.g. `DEBUNKED / HIGH MISINFORMATION`).
-*   `Scientific explanation` (clear, counter-arguments based on evidence).
-*   `Risk assessment` (harm rating float `[0.0, 1.0]`).
-*   `WHO-based evidence` (WHO and UNICEF vaccine guideline data).
-
----
-
-## 📂 Project Structure
-
-```text
-vaxipredict/
-├── backend/                  FastAPI API Engine + ML Models
-│   ├── app/
-│   │   ├── api/routes/       Modular API routes (auth, dashboard, predictions, reports, etc.)
-│   │   ├── core/             Security (bcrypt/jose), CORS, central config
-│   │   ├── db/               Session management, declarative base schema, seed scripts
-│   │   ├── ml/               SpatialGNN, TemporalLSTM definition & pipeline builders
-│   │   ├── models/           SQLAlchemy models (User, Region, Dataset, Prediction, etc.)
-│   │   ├── schemas/          Pydantic schemas for strict request/response validation
-│   │   └── services/         Ingestion parser, WhatsApp gateway, reports builder, Gemini AI
-│   └── requirements.txt      Python dependencies (PyTorch, SQLAlchemy, NetworkX, psycopg2)
-├── frontend/                 React + TypeScript + Vite Single Page Application
-│   └── src/
-│       ├── api/              Axios client with automatic token interceptors
-│       ├── components/       Shared layout (Header, Footer, Primitives)
-│       ├── context/          AuthContext (JWT, user profile sync)
-│       ├── pages/            Core view templates (Dashboard, Interventions, Heatmap, etc.)
-│       └── utils/            Shared utility helpers (dynamic SVG default avatars)
-├── render.yaml               Infrastructure blueprint for automated multi-service deploy
-└── README.md                 Comprehensive project documentation
-```
-
----
-
 ## 🔒 Security
 
 *   **SQL Injection Prevention:** Parametric ORM queries (SQLAlchemy).
@@ -93,39 +38,7 @@ vaxipredict/
 
 ---
 
-## 🚀 Getting Started
+## 🌐 Live Demo
 
-### 2. Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Activate a virtual environment:
-   ```bash
-   .venv\Scripts\activate  
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Seed the database tables:
-   ```bash
-   python app/db/seed.py
-   ```
-5. Run the FastAPI dev server:
-   ```bash
-   python -m uvicorn app.main:app --port 8001 --reload
-   ```
-
-### 3. Frontend Setup
-1. Navigate to the frontend directory:
-   ```bash
-   cd ../frontend
-   ```
-2. Install npm packages:
-   ```bash
-   npm install
-   ```
-3. Run the Vite development server:
-   ```bash
-   npm run dev
+You can access the live application here:
+🔗 **[VaxiPredict Live Link](https://your-live-deployment-link.com)**
