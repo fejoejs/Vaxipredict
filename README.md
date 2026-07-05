@@ -41,4 +41,4 @@
 ## 🌐 Live Demo
 
 You can access the live application here:
-🔗 **[VaxiPredict Live Link](https://your-live-deployment-link.com)**
+🔗 **[VaxiPredict Live Link](https://vaxipredict.onrender.com/)**

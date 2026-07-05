@@ -19,7 +19,7 @@ services:
         value: "https://vaxipredict.onrender.com"
 
   - type: web
-    name: vaxipredict-frontend
+    name: vaxipredict
     runtime: static
     rootDir: frontend
     buildCommand: "npm install && npm run build"
