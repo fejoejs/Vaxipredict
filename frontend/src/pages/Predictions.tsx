@@ -25,7 +25,10 @@ export default function Predictions() {
 
       // Connect to WebSocket progress stream
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${wsProtocol}//127.0.0.1:8000/api/v1/predictions/ws/progress/${taskId}`;
+      const wsHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "127.0.0.1:8001"
+        : window.location.host;
+      const wsUrl = `${wsProtocol}//${wsHost}/api/v1/predictions/ws/progress/${taskId}`;
       const ws = new WebSocket(wsUrl);
 
       ws.onmessage = (event) => {

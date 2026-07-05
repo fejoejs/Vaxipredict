@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { apiClient } from "../../api/client";
 import type { UserRole } from "../../types";
+import { generateDefaultAvatar } from "../../utils/avatar";
 
 const NAV_ITEMS: { to: string; label: string; roles?: UserRole[] }[] = [
   { to: "/dashboard", label: "Dashboard" },
@@ -22,6 +23,7 @@ interface UserProfile {
   full_name: string;
   email: string;
   role: string;
+  avatar_url?: string | null;
 }
 
 interface NotificationItem {
@@ -158,10 +160,12 @@ export default function Header() {
                   onClick={() => setDropdownOpen((v) => !v)}
                   className="flex items-center gap-2 p-0.5 rounded-full hover:bg-slate-900/60 transition-colors focus:outline-none"
                 >
-                  <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold shadow border border-purple-500/30">
-                      {initials}
-                    </div>
+                   <div className="relative">
+                    <img
+                      src={profile?.avatar_url || generateDefaultAvatar(profile?.full_name || "")}
+                      alt="Avatar"
+                      className="w-8 h-8 rounded-full object-cover shadow border border-purple-500/30"
+                    />
                     <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-slate-950 rounded-full" />
                   </div>
                   <span className="hidden md:inline text-xs font-medium text-slate-300 ml-2 select-none">
@@ -169,7 +173,7 @@ export default function Header() {
                   </span>
                   <span className="text-slate-400 text-[10px] ml-1.5 hidden md:inline">▼</span>
                 </button>
-
+ 
                 {/* Profile Dropdown Menu */}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2.5 w-64 bg-slate-900/95 backdrop-blur-xl border border-line rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-3 duration-200">
@@ -177,9 +181,11 @@ export default function Header() {
                     {/* 1. User Information */}
                     <div className="p-4 bg-gradient-to-b from-purple-950/20 to-slate-900/40 border-b border-line flex gap-3 items-center">
                       <div className="relative">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center text-sm font-bold border border-purple-500/35">
-                          {initials}
-                        </div>
+                        <img
+                          src={profile?.avatar_url || generateDefaultAvatar(profile?.full_name || "")}
+                          alt="Avatar"
+                          className="w-10 h-10 rounded-full object-cover border border-purple-500/35"
+                        />
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-950 rounded-full" />
                       </div>
                       <div className="overflow-hidden leading-tight">

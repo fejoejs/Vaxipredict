@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "../api/client";
 import { PageHeader, Loading, ErrorState } from "../components/ui/Primitives";
-import { useAuth } from "../context/AuthContext";
+import { generateDefaultAvatar } from "../utils/avatar";
 
 interface UserProfile {
   id: string;
@@ -9,17 +9,18 @@ interface UserProfile {
   email: string;
   role: string;
   is_active: boolean;
+  avatar_url?: string | null;
 }
 
 export default function Profile() {
-  const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [avatarSeed, setAvatarSeed] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [savingAvatar, setSavingAvatar] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -33,7 +34,7 @@ export default function Profile() {
       setProfile(data);
       setFullName(data.full_name);
       setEmail(data.email);
-      setAvatarSeed(data.full_name || data.email || "avatar");
+      setAvatarUrl(data.avatar_url || null);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to load profile");
     } finally {
@@ -41,24 +42,61 @@ export default function Profile() {
     }
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Image size must be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      setSavingAvatar(true);
+      setError(null);
+      setSuccess(null);
+      try {
+        const { data } = await apiClient.put("/auth/profile", {
+          avatar_url: base64
+        });
+        setAvatarUrl(data.avatar_url);
+        setSuccess("Avatar updated successfully!");
+        
+        const localUser = localStorage.getItem("vaxipredict_user");
+        if (localUser) {
+          const parsed = JSON.parse(localUser);
+          parsed.avatarUrl = data.avatar_url;
+          localStorage.setItem("vaxipredict_user", JSON.stringify(parsed));
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.detail || "Failed to upload avatar");
+      } finally {
+        setSavingAvatar(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSuccess(null);
     setError(null);
-    // Simulate saving profile updates
     try {
-      setSuccess("Profile information updated successfully! (Simulation)");
-      // Refresh local seed to update initials
-      setAvatarSeed(fullName);
-      // Update local storage user details if changed
+      const { data } = await apiClient.put("/auth/profile", {
+        full_name: fullName,
+      });
+      setSuccess("Profile information updated successfully!");
+      
       const localUser = localStorage.getItem("vaxipredict_user");
-      if (localUser && profile) {
+      if (localUser) {
         const parsed = JSON.parse(localUser);
         parsed.fullName = fullName;
         localStorage.setItem("vaxipredict_user", JSON.stringify(parsed));
       }
-    } catch (err) {
-      setError("Failed to update profile information");
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Failed to update profile information");
     }
   }
 
@@ -66,15 +104,7 @@ export default function Profile() {
   if (error) return <ErrorState message={error} onRetry={fetchProfile} />;
   if (!profile) return null;
 
-  // Initials for avatar
-  const initials = fullName
-    ? fullName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "U";
+  const avatarSrc = avatarUrl || generateDefaultAvatar(fullName);
 
   return (
     <div>
@@ -84,9 +114,11 @@ export default function Profile() {
         {/* Left Card: Avatar and Status */}
         <div className="card flex flex-col items-center text-center space-y-4">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center text-3xl font-bold border-4 border-purple-500/20">
-              {initials}
-            </div>
+            <img
+              src={avatarSrc}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full object-cover border-4 border-purple-500/20 shadow-lg"
+            />
             <span className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full" title="Online Status" />
           </div>
 
@@ -100,8 +132,20 @@ export default function Profile() {
             <p className="mt-1">User ID: <code className="bg-slate-950 px-1 py-0.5 rounded text-[10px] text-purple-400">{profile.id.substring(0, 8)}...</code></p>
           </div>
 
-          <button className="btn-secondary w-full text-xs" onClick={() => alert("Image upload modal would open here.")}>
-            Change Avatar
+          <input
+            type="file"
+            id="avatar-upload-input"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+
+          <button
+            className="btn-secondary w-full text-xs"
+            disabled={savingAvatar}
+            onClick={() => document.getElementById("avatar-upload-input")?.click()}
+          >
+            {savingAvatar ? "Uploading..." : "Change Avatar"}
           </button>
         </div>
 
@@ -124,13 +168,12 @@ export default function Profile() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-400">Email Address</label>
+                <label className="text-xs font-medium text-slate-400">Email Address (Read-only)</label>
                 <input
                   type="email"
-                  required
-                  className="input mt-1"
+                  disabled
+                  className="input mt-1 bg-slate-950/40 text-slate-400 cursor-not-allowed"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>

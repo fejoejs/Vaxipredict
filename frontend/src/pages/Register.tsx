@@ -1,7 +1,6 @@
 import { FormEvent, useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { apiClient } from "../api/client";
 import type { UserRole } from "../types";
 
 const ROLES: { value: UserRole; label: string }[] = [
@@ -19,7 +18,6 @@ export default function Register() {
   const [role, setRole] = useState<UserRole>("health_worker");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
 
   async function handleGoogleCallback(response: any) {
     setSubmitting(true);
@@ -35,25 +33,18 @@ export default function Register() {
   }
 
   useEffect(() => {
-    apiClient.get("/auth/google/client-id")
-      .then((res) => {
-        const client_id = res.data.client_id;
-        if (client_id) {
-          setGoogleClientId(client_id);
-          if ((window as any).google?.accounts?.id) {
-            const google = (window as any).google;
-            google.accounts.id.initialize({
-              client_id: client_id,
-              callback: handleGoogleCallback,
-            });
-            google.accounts.id.renderButton(
-              document.getElementById("google-signup-btn"),
-              { theme: "outline", size: "large", width: "336", shape: "rectangular", text: "signup_with" }
-            );
-          }
-        }
-      })
-      .catch((err) => console.error("Failed to load Google Client ID:", err));
+    const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    if (client_id && (window as any).google?.accounts?.id) {
+      const google = (window as any).google;
+      google.accounts.id.initialize({
+        client_id: client_id,
+        callback: handleGoogleCallback,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("google-signup-btn"),
+        { theme: "outline", size: "large", width: "336", shape: "rectangular", text: "signup_with" }
+      );
+    }
   }, []);
 
   async function handleSubmit(e: FormEvent) {
@@ -104,13 +95,15 @@ export default function Register() {
           </button>
         </form>
 
-        <div className={`mt-6 ${googleClientId ? "block" : "hidden"}`}>
-          <div className="relative flex items-center justify-center my-4">
-            <div className="border-t border-ink/10 w-full"></div>
-            <span className="absolute bg-card px-3 text-xs text-ink/40 font-medium uppercase">Or register with</span>
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+          <div className="mt-6">
+            <div className="relative flex items-center justify-center my-4">
+              <div className="border-t border-ink/10 w-full"></div>
+              <span className="absolute bg-card px-3 text-xs text-ink/40 font-medium uppercase">Or register with</span>
+            </div>
+            <div id="google-signup-btn" className="w-full flex justify-center mt-2"></div>
           </div>
-          <div id="google-signup-btn" className="w-full flex justify-center mt-2"></div>
-        </div>
+        )}
 
         <p className="text-xs text-ink/50 mt-5 text-center">
           Already have an account? <NavLink to="/login" className="text-teal font-medium">Sign in</NavLink>
