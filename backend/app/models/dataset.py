@@ -28,8 +28,8 @@ class VaccinationRecord(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     dataset_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("datasets.id"))
-    region_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("regions.id"))
-    period: Mapped[str] = mapped_column(String(20))  # e.g. "2026-05"
+    region_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("regions.id"), index=True)
+    period: Mapped[str] = mapped_column(String(20), index=True)  # e.g. "2026-05"
     doses_administered: Mapped[int] = mapped_column(Integer, default=0)
     eligible_population: Mapped[int] = mapped_column(Integer, default=0)
     hesitancy_rate: Mapped[float] = mapped_column(Float, default=0.0)

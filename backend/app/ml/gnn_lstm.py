@@ -121,11 +121,11 @@ class PredictionOutput:
 
 
 def risk_level_from_score(score: float) -> str:
-    if score < 0.25:
+    if score < 0.08:
         return "low"
-    if score < 0.5:
+    if score < 0.14:
         return "moderate"
-    if score < 0.75:
+    if score < 0.20:
         return "high"
     return "critical"
 
@@ -148,8 +148,9 @@ class HybridPredictor:
     def __init__(self, checkpoint_path: str | None = None):
         self.model = HybridGNNLSTM(self.NODE_FEATURE_DIM, self.SEQ_FEATURE_DIM)
         self.model.eval()
+        from app.core.config import settings
         self.model_version = "hybrid-gnn-lstm-v0-heuristic"
-        self.checkpoint_path = checkpoint_path or os.getenv("MODEL_CHECKPOINT_PATH", "")
+        self.checkpoint_path = checkpoint_path or settings.MODEL_CHECKPOINT_PATH
         self._maybe_load_checkpoint()
 
     def _maybe_load_checkpoint(self) -> None:

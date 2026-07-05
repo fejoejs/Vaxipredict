@@ -5,6 +5,19 @@ from app.core.config import settings
 from app.db.base import Base
 from app.db.session import engine
 
+# Import all models to register them on the Base metadata prior to table creation
+from app.models.user import User
+from app.models.region import Region, RegionEdge
+from app.models.dataset import Dataset, VaccinationRecord
+from app.models.prediction import PredictionResult
+from app.models.knowledge import KnowledgeArticle
+from app.models.rumor import RumorReport
+from app.models.reminder import Reminder
+from app.models.intervention import InterventionPlan
+from app.models.notification import Notification
+from app.models.config import SystemConfig
+from app.models.report import ReportLog
+
 from app.api.routes import (
     auth,
     dashboard,

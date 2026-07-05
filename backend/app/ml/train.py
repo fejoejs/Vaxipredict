@@ -119,9 +119,9 @@ def generate_cdc_dataset():
 
                 hes = round(
                     base_hes
-                    + 0.08 * misinfo
-                    - 0.02 * i
-                    + float(np.random.normal(0, 0.015)),
+                    + 0.15 * misinfo
+                    - 0.005 * i
+                    + float(np.random.normal(0, 0.01)),
                     4,
                 )
                 hes = min(max(hes, 0.02), 0.95)
@@ -185,7 +185,7 @@ def train_model():
     for name, idx in state_to_idx.items():
         recs = sorted(records_by_state[name], key=lambda x: x["period"])
         pop = float(recs[-1]["population"])
-        pop_norm = min(pop / 10000000.0, 1.0)
+        pop_norm = min(pop / 200000000.0, 1.0)
 
         # Sequences
         for t in range(T):
@@ -230,7 +230,7 @@ def train_model():
     # Simple training loop
     model.train()
     print("Training GNN-LSTM model on CDC dataset...")
-    for epoch in range(100):
+    for epoch in range(300):
         optimizer.zero_grad()
         out, _, _ = model(x, a, seq)
         loss = criterion(out, y)

@@ -14,6 +14,7 @@ from app.models.reminder import Reminder
 from app.models.intervention import InterventionPlan
 from app.models.notification import Notification
 from app.models.config import SystemConfig
+from app.models.report import ReportLog
 from app.core.security import hash_password
 from app.core.config import settings
 from app.ml.pipeline import run_hybrid_prediction
@@ -322,11 +323,6 @@ if settings.GEMINI_API_KEY:
     db.add(SystemConfig(key="gemini_api_key", value=settings.GEMINI_API_KEY))
 else:
     print("Warning: GEMINI_API_KEY not configured in .env. Skipping config seeding.")
-
-if settings.GOOGLE_CLIENT_ID:
-    db.add(SystemConfig(key="google_client_id", value=settings.GOOGLE_CLIENT_ID))
-else:
-    print("Warning: GOOGLE_CLIENT_ID not configured in .env. Skipping config seeding.")
 
 db.commit()
 db.close()

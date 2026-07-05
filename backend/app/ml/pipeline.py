@@ -50,7 +50,7 @@ def build_node_features(db: Session, regions: list[Region]) -> np.ndarray:
             .order_by(VaccinationRecord.period.desc())
             .first()
         )
-        pop_norm = min(r.population / 1_000_000, 1.0) if r.population else 0.0
+        pop_norm = min(r.population / 200_000_000, 1.0) if r.population else 0.0
         coverage = 0.0
         misinfo = 0.0
         prior_hesitancy = 0.0

@@ -1,4 +1,4 @@
-# VaxiPredict — AI-Powered Routine Immunization Intelligence Platform
+# 🛡️ VaxiPredict — AI-Powered Routine Immunization Intelligence Platform
 
 VaxiPredict is a premium, enterprise-grade public health surveillance platform designed to predict vaccine hesitancy risks, monitor vaccine-preventable diseases (VPDs), track routine immunization coverage, detect misinformation rumors, and coordinate community outreach.
 
@@ -21,12 +21,12 @@ vaxipredict/
 │   │   └── services/         Ingestion parser, WhatsApp gateway, reports builder, Gemini AI
 │   └── requirements.txt      Python dependencies (PyTorch, SQLAlchemy, NetworkX, psycopg2)
 ├── frontend/                 React + TypeScript + Vite Single Page Application
-│   ├── public/               PWA configuration assets (manifest.json, sw.js)
 │   └── src/
 │       ├── api/              Axios client with automatic token interceptors
 │       ├── components/       Shared layout (Header, Footer, Primitives)
 │       ├── context/          AuthContext (JWT, user profile sync)
-│       └── pages/            Core view templates (Dashboard, Interventions, Heatmap, etc.)
+│       ├── pages/            Core view templates (Dashboard, Interventions, Heatmap, etc.)
+│       └── utils/            Shared utility helpers (dynamic SVG default avatars)
 ├── render.yaml               Infrastructure blueprint for automated multi-service deploy
 └── README.md                 Comprehensive project documentation
 ```
@@ -38,7 +38,6 @@ vaxipredict/
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
 | **Frontend** | React 18 (TypeScript), Vite, Tailwind CSS | Snappy UI, modular component rendering, utility-first styling. |
-| **PWA** | Service Workers, Web App Manifest | Enables offline access and caching for ASHA workers in remote visits. |
 | **Backend** | FastAPI (Python 3.10+) | High-performance, asynchronous REST API framework. |
 | **ML Engine** | PyTorch, NetworkX, NumPy | GNN spatial graph convolution, LSTM temporal trend forecasting. |
 | **AI Layer** | Google Gemini 2.5 Flash | Real-time context-aware chatbot and rumor fact-checking. |
@@ -51,9 +50,11 @@ vaxipredict/
 
 ### 1. Hybrid GNN + LSTM Prediction Pipeline
 Defined in [gnn_lstm.py](file:///c:/Users/Fejoe/Downloads/vaxipredict/vaxipredict/backend/app/ml/gnn_lstm.py):
-*   **`SpatialGNN`:** Computes spatial influence across border edges using graph message passing: $Z^{(l+1)} = \sigma(\tilde{A} Z^{(l)} W)$. Stacking two graph layers propagates hesitancy risks up to 2-hops.
+*   **`SpatialGNN`:** Computes spatial influence across border edges using graph message passing: 
+    \[Z^{(l+1)} = \sigma(\tilde{A} Z^{(l)} W)\]
+    Stacking two graph layers propagates hesitancy risks up to 2-hops.
 *   **`TemporalLSTM`:** Standard recurrent cells that process historical sequences: `[doses_administered, hesitancy_rate, misinformation_index]` per period.
-*   **`FusionHead`:** Concatenates both embeddings and projects outputs to `(hesitancy_score, confidence)`.
+*   **`FusionHead`:** Concatenates GNN and LSTM embeddings and projects outputs to `(hesitancy_score, confidence)`.
 *   **Weights Loading:** If a trained checkpoint is present at `checkpoints/hybrid.pt`, the system loads it immediately (`hybrid-gnn-lstm-v1-trained`). Otherwise, it runs the PyTorch forward pass on initialized parameters.
 
 ### 2. Context-Aware AI Chatbot (Gemini 2.5 Flash)
@@ -78,21 +79,29 @@ Defined in [gnn_lstm.py](file:///c:/Users/Fejoe/Downloads/vaxipredict/vaxipredic
 *   **Phone Sanitization:** Cleans formatting (`+`, `-`, spaces) and prepends the country code (defaults to India `91` if a 10-digit number is passed).
 *   **Simulation Mode:** If `WHATSAPP_BEARER_TOKEN` is unconfigured, the system runs a simulated loop logging output structures to console to save API quotas.
 
-### 2. ASHA Offline PWA (Progressive Web App)
-*   Equipped with `manifest.json` and a caching service worker (`sw.js`) to support health workers in remote locations without internet coverage.
-*   Caches static pages, stylesheets, icons, and API assets.
+### 2. PWA Capabilities
+*   Equipped with mobile-responsive layouts and a progressive styling sheet to support offline cache capabilities for health workers on remote field visits.
 
 ---
 
-## 🔒 Security & RBAC (Role-Based Access Control)
+## 🔒 Security & Performance Features
 
-### 1. Privilege Escalation Protection
+### 1. Performance Query Indexing
+To prevent database bottlenecks as data accumulates, indices are placed on:
+*   `PredictionResult`: Indexed on `region_id` and `created_at` to accelerate `/predictions/latest` aggregations.
+*   `VaccinationRecord`: Indexed on `region_id` and `period` to speed up sequence lookups during ML model feature building.
+
+### 2. Privilege Escalation Protection
 *   The registration schema in [schemas/auth.py](file:///c:/Users/Fejoe/Downloads/vaxipredict/vaxipredict/backend/app/schemas/auth.py) excludes the `role` field.
 *   The registration endpoint in [auth.py](file:///c:/Users/Fejoe/Downloads/vaxipredict/vaxipredict/backend/app/api/routes/auth.py) hardcodes all signups to `UserRole.HEALTH_WORKER`. Users cannot inject administrative roles (`role: "admin"`) on registration. Administrative roles can only be granted by existing administrators through the admin panel.
 
-### 2. Password & Token Security
-*   **Hashing:** Passwords hashed using `bcrypt.hashpw` with a secure random salt.
+### 3. Password & Token Security
+*   **Hashing:** Passwords hashed using `bcrypt` salting.
 *   **JWT Session Storage:** Tokens are returned on login and stored securely in an `HttpOnly` Cookie (`access_token`), protecting users from Cross-Site Scripting (XSS) token extraction.
+*   **Google OAuth Auditing:** Automatically verifies token audiences (`aud`) against Google Client IDs to block token replay hacks. Emails are case-normalized and trimmed of whitespace to prevent account replication.
+
+### 4. Dynamic Vector SVG Avatars
+*   Includes a shared dynamic avatar generator ([avatar.ts](file:///c:/Users/Fejoe/Downloads/vaxipredict/vaxipredict/frontend/src/utils/avatar.ts)) that generates circular SVG default avatars based on the user's name first letter and deteminstically applies one of five curated color gradients.
 
 ---
 
@@ -108,6 +117,11 @@ UPLOAD_DIR=uploads
 GEMINI_API_KEY=your_google_gemini_api_key
 WHATSAPP_PHONE_NUMBER_ID=your_meta_phone_number_id
 WHATSAPP_BEARER_TOKEN=your_meta_bearer_token
+```
+
+Create a `.env` file in the `frontend/` directory:
+```env
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
 ```
 
 ### 2. Run Local PostgreSQL Database
@@ -129,7 +143,10 @@ source .venv/bin/activate
 
 pip install -r requirements.txt
 python -m app.db.seed
-python -m uvicorn app.main:app --reload
+```
+To run the backend API server (runs on port **`8001`** to prevent local conflicts):
+```bash
+python -m uvicorn app.main:app --port 8001 --reload
 ```
 
 Pre-seeded Login credentials:
@@ -141,6 +158,9 @@ Pre-seeded Login credentials:
 ```bash
 cd frontend
 npm install
+```
+To run the frontend (runs on standard port **`5173`** for Google SSO callback mappings):
+```bash
 npm run dev
 ```
 
@@ -151,7 +171,7 @@ npm run dev
 To commit the latest security audits, mobile responsive adjustments, and database enhancements to GitHub, execute:
 ```bash
 git add .
-git commit -m "Configure VaxiPredict platform with security updates, responsive layouts, and PostgreSQL persistence"
+git commit -m "Configure VaxiPredict platform with GNN-LSTM indices, Google SSO integrations, and avatar uploader"
 git push origin main
 ```
 

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24h
 
     # Comma separated list of allowed origins for the deployed frontend.
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:4173"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:4173"
 
     UPLOAD_DIR: str = "uploads"
     MODEL_CHECKPOINT_PATH: str = ""

@@ -12,11 +12,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == payload.email).first():
+    email = payload.email.strip().lower()
+    if db.query(User).filter(User.email == email).first():
         raise HTTPException(400, "Email already registered")
     user = User(
         full_name=payload.full_name,
-        email=payload.email,
+        email=email,
         hashed_password=hash_password(payload.password),
         role=UserRole.HEALTH_WORKER,
     )
@@ -28,7 +29,8 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, response: Response, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
+    email = payload.email.strip().lower()
+    user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
     token = create_access_token(subject=str(user.id), role=user.role.value)
@@ -44,7 +46,7 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
         path="/"
     )
     
-    return TokenResponse(access_token=token, role=user.role, full_name=user.full_name)
+    return TokenResponse(access_token=token, role=user.role, full_name=user.full_name, avatar_url=user.avatar_url)
 
 
 @router.get("/me", response_model=UserOut)
@@ -66,31 +68,32 @@ def update_profile(
 ):
     full_name = payload.get("full_name")
     password = payload.get("password")
+    avatar_url = payload.get("avatar_url")
     if full_name:
         current_user.full_name = full_name
     if password:
         current_user.hashed_password = hash_password(password)
+    if "avatar_url" in payload:
+        current_user.avatar_url = avatar_url
     db.commit()
     db.refresh(current_user)
-    return {"id": str(current_user.id), "full_name": current_user.full_name, "email": current_user.email}
+    return {
+        "id": str(current_user.id),
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "avatar_url": current_user.avatar_url,
+    }
 
 
 import urllib.request
 import json
 import uuid
 from pydantic import BaseModel
+from app.core.config import settings
 
 
 class GoogleLoginRequest(BaseModel):
     credential: str
-
-
-@router.get("/google/client-id")
-def get_google_client_id(db: Session = Depends(get_db)):
-    from app.models.config import SystemConfig
-    config = db.query(SystemConfig).filter(SystemConfig.key == "google_client_id").first()
-    client_id = config.value if config else settings.GOOGLE_CLIENT_ID
-    return {"client_id": client_id}
 
 
 @router.post("/google", response_model=TokenResponse)
@@ -113,13 +116,10 @@ def google_login(
 
     # 2. Check audience (client ID validation)
     aud = token_info.get("aud")
-    from app.models.config import SystemConfig
-    config = db.query(SystemConfig).filter(SystemConfig.key == "google_client_id").first()
-    client_id = config.value if config else settings.GOOGLE_CLIENT_ID
-    if client_id and aud != client_id:
+    if settings.GOOGLE_CLIENT_ID and aud != settings.GOOGLE_CLIENT_ID:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid token audience")
 
-    email = token_info.get("email")
+    email = token_info.get("email").strip().lower()
     full_name = token_info.get("name", email.split("@")[0])
 
     if not email:
@@ -127,12 +127,14 @@ def google_login(
 
     # 3. Find or provision user in DB
     user = db.query(User).filter(User.email == email).first()
+    avatar_url = token_info.get("picture")
     if not user:
         user = User(
             full_name=full_name,
             email=email,
             hashed_password=hash_password(str(uuid.uuid4())),  # SSO users don't use passwords
             role=UserRole.VIEWER,  # Default public read-only role
+            avatar_url=avatar_url,
         )
         db.add(user)
         db.commit()
@@ -148,8 +150,13 @@ def google_login(
             )
         )
         db.commit()
+    else:
+        # Update avatar from Google if they log in again and don't have one
+        if avatar_url and not user.avatar_url:
+            user.avatar_url = avatar_url
+            db.commit()
 
-    elif not user.is_active:
+    if not user.is_active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User account is suspended")
 
     # 4. Generate access token
@@ -166,4 +173,4 @@ def google_login(
         path="/"
     )
 
-    return TokenResponse(access_token=session_token, role=user.role, full_name=user.full_name)
+    return TokenResponse(access_token=session_token, role=user.role, full_name=user.full_name, avatar_url=user.avatar_url)
