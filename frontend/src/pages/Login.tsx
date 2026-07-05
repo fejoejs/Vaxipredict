@@ -33,7 +33,7 @@ export default function Login() {
       });
       google.accounts.id.renderButton(
         document.getElementById("google-signin-btn"),
-        { theme: "outline", size: "large", width: "336", shape: "rectangular", text: "signin_with" }
+        { theme: "outline", size: "large", width: "300", shape: "rectangular", text: "signin_with" }
       );
     }
   }, []);

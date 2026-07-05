@@ -42,7 +42,7 @@ export default function Register() {
       });
       google.accounts.id.renderButton(
         document.getElementById("google-signup-btn"),
-        { theme: "outline", size: "large", width: "336", shape: "rectangular", text: "signup_with" }
+        { theme: "outline", size: "large", width: "300", shape: "rectangular", text: "signup_with" }
       );
     }
   }, []);
