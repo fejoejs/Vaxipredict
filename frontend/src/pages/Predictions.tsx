@@ -24,10 +24,27 @@ export default function Predictions() {
       const taskId = runRes.task_id;
 
       // Connect to WebSocket progress stream
-      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-        ? "127.0.0.1:8001"
-        : window.location.host;
+      let wsHost = "";
+      let wsProtocol = "ws:";
+
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (apiBaseUrl) {
+        try {
+          const tempUrl = new URL(apiBaseUrl, window.location.origin);
+          wsHost = tempUrl.host;
+          wsProtocol = tempUrl.protocol === "https:" ? "wss:" : "ws:";
+        } catch (e) {
+          wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+          wsHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+            ? "127.0.0.1:8001"
+            : window.location.host;
+        }
+      } else {
+        wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        wsHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "127.0.0.1:8001"
+          : window.location.host;
+      }
       const wsUrl = `${wsProtocol}//${wsHost}/api/v1/predictions/ws/progress/${taskId}`;
       const ws = new WebSocket(wsUrl);
 

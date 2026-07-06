@@ -180,11 +180,23 @@ class HybridPredictor:
             t = np.arange(sequences.shape[1])
             y = sequences[i, :, 1]
             slope = float(np.polyfit(t, y, 1)[0]) if len(t) > 1 else 0.0
-            score = float(hesitancy[i])
+            
+            if self.model_version == "hybrid-gnn-lstm-v0-heuristic":
+                # Deterministic sensible heuristic blend using node features
+                prior_hesitancy = float(node_features[i, 3])
+                misinfo_index = float(node_features[i, 2])
+                coverage_rate = float(node_features[i, 1])
+                score = prior_hesitancy * 0.6 + misinfo_index * 0.15 + (1.0 - coverage_rate) * 0.1
+                score = max(0.01, min(0.99, score))
+                conf = 0.85 - 0.2 * misinfo_index
+            else:
+                score = float(hesitancy[i])
+                conf = float(confidence[i])
+
             results.append(
                 PredictionOutput(
                     hesitancy_score=round(score, 4),
-                    confidence=round(float(confidence[i]), 4),
+                    confidence=round(conf, 4),
                     risk_level=risk_level_from_score(score),
                     gnn_embedding_norm=round(float(np.linalg.norm(spatial_emb[i].numpy())), 4),
                     lstm_trend_slope=round(slope, 4),
