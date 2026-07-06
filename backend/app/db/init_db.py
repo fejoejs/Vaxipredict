@@ -16,6 +16,7 @@ from app.models.notification import Notification
 from app.models.config import SystemConfig
 from app.models.report import ReportLog
 from app.core.security import hash_password
+from app.core.config import settings
 from app.ml.pipeline import run_hybrid_prediction
 
 # 1. Create tables if they do not exist
