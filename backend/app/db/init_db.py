@@ -171,24 +171,52 @@ try:
 
         # 4. Seed Knowledge Articles
         print("Seeding knowledge articles...")
-        articles = [
-            KnowledgeArticle(
-                title="Understanding Vaccine Hesitancy",
-                content="Vaccine hesitancy refers to delay in acceptance or refusal of vaccines despite availability of vaccination services...",
-                category="General",
-                tags="basics, hesitancy",
-                read_time_minutes=4
-            ),
-            KnowledgeArticle(
-                title="Addressing Misinformation Campaigns",
-                content="Misinformation is one of the key drivers of routine immunization failure. This guide details techniques...",
-                category="Outreach",
-                tags="misinformation, myths",
-                read_time_minutes=7
-            )
+        knowledge_seed = [
+            ("MMR (Measles, Mumps, Rubella)", "childhood",
+             "Protects against measles, mumps, and rubella with two doses.",
+             "Dose 1 at 12-15 months, Dose 2 at 4-6 years.",
+             "Myth: causes autism — repeatedly disproven by large-scale studies."),
+            ("DTP (Diphtheria, Tetanus, Pertussis)", "childhood",
+             "Protects against three serious bacterial diseases.",
+             "5-dose series between 2 months and 6 years.",
+             "Myth: natural immunity is safer — untreated cases can be fatal."),
+            ("Influenza", "adult",
+             "Annual vaccine reducing seasonal flu severity and spread.",
+             "One dose annually, ideally before flu season.",
+             "Myth: the flu shot gives you the flu — it uses inactivated virus."),
+            ("HPV", "adult",
+             "Protects against HPV strains linked to several cancers.",
+             "2-3 doses depending on age at first dose.",
+             "Myth: only necessary for one gender — HPV affects everyone."),
+            ("Yellow Fever", "travel",
+             "Required for entry to many countries in endemic zones.",
+             "Single dose, lifetime protection for most travelers.",
+             "Myth: only needed for direct exposure regions — required by transit rules too."),
+            ("BCG (Tuberculosis)", "childhood",
+             "Protects infants against tuberculous meningitis and disseminated tuberculosis.",
+             "Single dose given at birth.",
+             "Myth: BCG makes a child immune to COVID-19 — there is no conclusive scientific evidence supporting this claim."),
+            ("OPV & IPV (Polio)", "childhood",
+             "Protects against polio paralysis. India is polio-free, but routine drops prevent resurgence.",
+             "OPV drops at birth, 6, 10, 14 weeks. IPV injected at 6 and 14 weeks.",
+             "Myth: polio drops cause sterilization — a thoroughly disproven rumor from population health studies."),
+            ("Pentavalent Vaccine", "childhood",
+             "Protects against Diphtheria, Pertussis, Tetanus, Hepatitis B, and Haemophilus influenzae type b.",
+             "Three doses at 6, 10, and 14 weeks.",
+             "Myth: too many vaccines at once overload a baby — infant immune systems safely process multiple antigens."),
+            ("Rotavirus Vaccine", "childhood",
+             "Protects infants against severe dehydrating rotavirus diarrhea.",
+             "Three oral drops at 6, 10, and 14 weeks.",
+             "Myth: oral drops cause infection — they contain weakened virus to train immunity safely."),
         ]
-        for a in articles:
-            db.add(a)
+        for name, cat, summary, schedule, myths in knowledge_seed:
+            db.add(KnowledgeArticle(
+                vaccine_name=name,
+                category=cat,
+                summary=summary,
+                recommended_schedule=schedule,
+                common_myths=myths
+            ))
         db.flush()
 
         # 5. Seed Rumor Reports
