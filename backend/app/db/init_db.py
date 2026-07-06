@@ -222,74 +222,95 @@ try:
         # 5. Seed Rumor Reports
         print("Seeding rumor reports...")
         rumors = [
-            RumorReport(
-                title="Infertility Myth in Uttar Pradesh",
-                description="Rumors circulating on WhatsApp claiming vaccines cause fertility issues in rural villages.",
-                source="WhatsApp Forward",
-                region_id=regions_by_name["Uttar Pradesh"].id,
-                reported_at=datetime.utcnow() - timedelta(days=2),
-                status="verified",
-                veracity_rating="debunked",
-                veracity_explanation="WHO clinical trials have confirmed no link between immunization and reproductive health."
-            )
+            ("Uttar Pradesh", "social_media", "WhatsApp forwards claiming MMR vaccine causes autism.", 0.85, "reviewed"),
+            ("Maharashtra", "community", "Local flyers claim flu shots make you more susceptible to COVID.", 0.42, "flagged"),
+            ("Bihar", "social_media", "TikTok videos allege HPV vaccines cause early menopause.", 0.78, "flagged"),
+            ("West Bengal", "sms", "Spam texts warning against childhood vaccines.", 0.28, "reviewed"),
+            ("Madhya Pradesh", "other", "Flyers at a local transit station advising against travel vaccines.", 0.12, "dismissed"),
         ]
-        for r in rumors:
-            db.add(r)
+        for reg_name, src, content, score, status in rumors:
+            db.add(RumorReport(
+                region_id=regions_by_name[reg_name].id,
+                submitted_by=worker_user.id,
+                source=src,
+                content=content,
+                risk_score=score,
+                status=status,
+            ))
         db.flush()
 
         # 6. Seed Reminders
         print("Seeding reminders...")
+        due_1 = datetime.utcnow().date() + timedelta(days=2)
+        due_2 = datetime.utcnow().date() + timedelta(days=5)
+        due_3 = datetime.utcnow().date() + timedelta(days=12)
+
         reminders = [
-            Reminder(
-                beneficiary_name="Aarav Sharma",
-                phone_number="+919876543210",
-                vaccine_type="MR-1",
-                due_date=datetime.utcnow().date() + timedelta(days=3),
-                status="pending",
-                region_id=regions_by_name["Delhi"].id
-            ),
-            Reminder(
-                beneficiary_name="Priya Patel",
-                phone_number="+919876543211",
-                vaccine_type="Pentavalent-3",
-                due_date=datetime.utcnow().date() - timedelta(days=1),
-                status="sent",
-                region_id=regions_by_name["Maharashtra"].id
-            )
+            ("Uttar Pradesh", "Amit Sharma", "+91-98765-43210", "MMR", due_1, "pending"),
+            ("Maharashtra", "Priya Patil", "+91-98234-56789", "DTP", due_2, "pending"),
+            ("Bihar", "Rahul Kumar", "+91-99345-67890", "HPV", due_3, "sent"),
         ]
-        for rem in reminders:
-            db.add(rem)
+        for reg_name, name, contact, vaccine, due, status in reminders:
+            db.add(Reminder(
+                region_id=regions_by_name[reg_name].id,
+                created_by=worker_user.id,
+                beneficiary_name=name,
+                contact=contact,
+                vaccine_name=vaccine,
+                due_date=due,
+                status=status,
+            ))
         db.flush()
 
         # 7. Seed Interventions
         print("Seeding interventions...")
         interventions = [
-            InterventionPlan(
-                title="Delhi Awareness Camp",
-                description="Community awareness campaign focusing on debunking MMR rumors in local sectors.",
-                region_id=regions_by_name["Delhi"].id,
-                start_date=datetime.utcnow().date(),
-                end_date=datetime.utcnow().date() + timedelta(days=10),
-                budget=50000.0,
-                status="planned",
-                strategy="community_meeting"
-            )
+            ("Uttar Pradesh", "awareness_campaign", "Parents", 0.08, 12000),
+            ("Maharashtra", "mobile_clinic", "Rural families", 0.12, 35000),
         ]
-        for iv in interventions:
-            db.add(iv)
+        for reg_name, strategy, target, drop, budget in interventions:
+            db.add(InterventionPlan(
+                region_id=regions_by_name[reg_name].id,
+                created_by=analyst_user.id,
+                strategy=strategy,
+                target_group=target,
+                projected_hesitancy_drop=drop,
+                budget_estimate=budget,
+                notes="Pre-seeded campaign",
+            ))
         db.flush()
 
-        # 8. Seed System Configuration
+        # 8. Seed Notifications
+        print("Seeding notifications...")
+        notifications = [
+            (admin_user.id, "Welcome to VaxiPredict", "The platform is fully configured. The trained Indian GNN-LSTM model is loaded."),
+            (admin_user.id, "Indian Dataset Uploaded", "The original Indian vaccine hesitancy dataset has been parsed and seeded successfully."),
+            (analyst_user.id, "Pipeline Ran Successfully", "AI model completed forecasting hesitancy levels across all 20 Indian states."),
+            (worker_user.id, "Pending Reminders Alert", "You have 2 pending vaccination reminders due in the next 5 days."),
+        ]
+        for uid, title, msg in notifications:
+            db.add(Notification(
+                user_id=uid,
+                title=title,
+                message=msg,
+                is_read=False,
+            ))
+        db.flush()
+
+        # 9. Seed System Configuration
+        print("Seeding system configurations...")
         db.add(SystemConfig(key="whatsapp_sandbox_mode", value="true"))
         db.add(SystemConfig(key="gemini_enabled", value="true"))
+        if settings.GEMINI_API_KEY:
+            db.add(SystemConfig(key="gemini_api_key", value=settings.GEMINI_API_KEY))
         db.flush()
 
-        # 9. Seed Report Logs
+        # 10. Seed Report Logs
         print("Seeding report logs...")
         reports = [
             ReportLog(
-                title="Baseline Vulnerability Report",
-                report_type="Vulnerability",
+                report_type="predictions",
+                file_format="pdf",
                 generated_by=analyst_user.id,
                 file_path="reports/baseline_vulnerability.pdf"
             )
@@ -298,7 +319,7 @@ try:
             db.add(rep)
         db.flush()
 
-        # 10. Run initial machine learning forecast pipeline and seed risk scores
+        # 11. Run initial machine learning forecast pipeline and seed risk scores
         print("Running AI model predictions and seeding risk scores...")
         pairs = run_hybrid_prediction(db)
         for region, output in pairs:
