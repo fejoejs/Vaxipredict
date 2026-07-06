@@ -270,9 +270,23 @@ try:
             db.add(rep)
         db.flush()
 
-        # 10. Run initial machine learning forecast pipeline
-        print("Running initial pipeline forecasts...")
-        run_hybrid_prediction(db, "2026-06")
+        # 10. Run initial machine learning forecast pipeline and seed risk scores
+        print("Running AI model predictions and seeding risk scores...")
+        pairs = run_hybrid_prediction(db)
+        for region, output in pairs:
+            pred = PredictionResult(
+                region_id=region.id,
+                dataset_id=dataset.id,
+                period="2026-06",
+                hesitancy_score=output.hesitancy_score,
+                confidence=output.confidence,
+                risk_level=output.risk_level,
+                gnn_embedding_norm=output.gnn_embedding_norm,
+                lstm_trend_slope=output.lstm_trend_slope,
+                model_version=output.model_version,
+            )
+            db.add(pred)
+        db.flush()
 
         db.commit()
         print("Database initialization and seeding completed successfully!")

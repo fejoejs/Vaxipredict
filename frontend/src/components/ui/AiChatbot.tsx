@@ -184,10 +184,10 @@ export default function AiChatbot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end max-w-[calc(100vw-2rem)]">
       {/* Floating Chat Window */}
       {isOpen && (
-        <div className="w-[360px] h-[500px] bg-slate-900/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[calc(100vw-2rem)] sm:w-[360px] h-[420px] sm:h-[500px] bg-slate-900/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
           <div className="bg-gradient-to-r from-slate-900 to-purple-950/80 px-4 py-3 border-b border-line flex items-center justify-between">
             <div className="flex items-center gap-2">
