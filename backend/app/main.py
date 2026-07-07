@@ -75,10 +75,12 @@ def on_startup():
 
 
 @app.get("/")
+@app.head("/")
 def root():
     return {"service": settings.PROJECT_NAME, "status": "ok"}
 
 
 @app.get("/health")
+@app.head("/health")
 def health():
     return {"status": "healthy"}
