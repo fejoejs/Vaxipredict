@@ -160,7 +160,7 @@ export default function Home() {
               </span>
             </div>
 
-            <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight">
               See hesitancy spread
               <span className="block mt-2 bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-300 bg-clip-text text-transparent">
                 before it takes hold.
