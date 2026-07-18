@@ -126,18 +126,18 @@ export default function Home() {
   }, [simBudget, simStrategy, simDensity]);
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-10 sm:space-y-16">
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-900/20 border border-line p-8 md:p-12 lg:p-16">
+      <section className="relative overflow-hidden rounded-3xl bg-slate-900/20 border border-line p-5 sm:p-8 md:p-12 lg:p-16">
         
         {/* Glow Effects */}
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="grid lg:grid-cols-[1.3fr_1fr] gap-12 items-center relative z-10">
+        <div className="grid lg:grid-cols-[1.3fr_1fr] gap-8 lg:gap-12 items-center relative z-10">
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             
             {/* Logo + Brand Pill */}
             <div className="flex items-center gap-3">
@@ -156,11 +156,11 @@ export default function Home() {
                 />
               </svg>
               <span className="inline-block text-xs font-bold tracking-widest uppercase text-purple-400 bg-purple-500/10 rounded-full px-3 py-1 border border-purple-500/15">
-                VaxiPredict India Platform
+                VaxiPredict
               </span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight">
+            <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight">
               See hesitancy spread
               <span className="block mt-2 bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-300 bg-clip-text text-transparent">
                 before it takes hold.
@@ -172,17 +172,17 @@ export default function Home() {
               vaccine hesitancy risk across India's states, audit rumors, and evaluate targeted interventions.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
               {isAuthenticated ? (
-                <NavLink to="/dashboard" className="btn-primary px-6 py-3 text-sm shadow-lg shadow-purple-600/20">
+                <NavLink to="/dashboard" className="btn-primary w-full sm:w-auto text-center px-6 py-3 text-sm shadow-lg shadow-purple-600/20">
                   Go to Dashboard
                 </NavLink>
               ) : (
                 <>
-                  <NavLink to="/login" className="btn-primary px-6 py-3 text-sm shadow-lg shadow-purple-600/25">
+                  <NavLink to="/login" className="btn-primary w-full sm:w-auto text-center px-6 py-3 text-sm shadow-lg shadow-purple-600/25">
                     Sign In to Account
                   </NavLink>
-                  <NavLink to="/register" className="btn-secondary px-6 py-3 text-sm hover:border-purple-500/40">
+                  <NavLink to="/register" className="btn-secondary w-full sm:w-auto text-center px-6 py-3 text-sm hover:border-purple-500/40">
                     Sign Up (Create Account)
                   </NavLink>
                 </>
@@ -192,14 +192,14 @@ export default function Home() {
           </div>
 
           {/* Stats Glassmorphism Grid */}
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
             {GLOBAL_STATS.map((s, idx) => (
               <div
                 key={idx}
-                className="card bg-slate-900/40 border border-line/60 p-5 hover:border-purple-500/35 hover:-translate-y-0.5 transition-all duration-300 shadow-lg"
+                className="card bg-slate-900/40 border border-line/60 p-4 sm:p-5 hover:border-purple-500/35 hover:-translate-y-0.5 transition-all duration-300 shadow-lg"
               >
-                <p className="font-display text-2xl font-bold text-purple-300">{s.value}</p>
-                <p className="text-xs text-slate-300 mt-1 font-medium">{s.label}</p>
+                <p className="font-display text-xl sm:text-2xl font-bold text-purple-300">{s.value}</p>
+                <p className="text-xs text-slate-350 mt-1 font-medium">{s.label}</p>
                 <p className="text-[10px] text-slate-500 mt-2 font-mono uppercase tracking-wider">{s.source}</p>
               </div>
             ))}
@@ -228,17 +228,17 @@ export default function Home() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {BENEFITS.map((b, idx) => (
-            <div key={idx} className="card bg-slate-900/10 border border-line/60 p-6 space-y-3 hover:border-purple-500/30 transition-colors">
+            <div key={idx} className="card bg-slate-900/10 border border-line/60 p-5 sm:p-6 space-y-3 hover:border-purple-500/30 transition-colors">
               <span className="text-3xl">{b.icon}</span>
               <h3 className="font-semibold text-sm text-white">{b.title}</h3>
-              <p className="text-xs text-slate-350 leading-relaxed">{b.desc}</p>
+              <p className="text-xs text-slate-355 leading-relaxed">{b.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Unique Interactive Sandbox: Live Intervention Modeler */}
-      <section className="card bg-slate-900/10 border border-line relative overflow-hidden p-6 md:p-10 space-y-8">
+      <section className="card bg-slate-900/10 border border-line relative overflow-hidden p-5 sm:p-8 md:p-10 space-y-8">
         <div className="grid lg:grid-cols-[1.1fr_1fr] gap-8 items-center">
           
           <div className="space-y-4">
@@ -251,11 +251,11 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="p-3 bg-slate-950/40 border border-line rounded-lg text-center">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Simulated Hesitancy Drop</p>
-                <p className="text-2xl font-bold text-emerald-400 font-mono mt-1">-{simulatedResults.drop}%</p>
+                <p className="text-xl sm:text-2xl font-bold text-emerald-400 font-mono mt-1">-{simulatedResults.drop}%</p>
               </div>
               <div className="p-3 bg-slate-950/40 border border-line rounded-lg text-center">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Target Beneficiaries</p>
-                <p className="text-2xl font-bold text-purple-300 font-mono mt-1">{simulatedResults.beneficiaries}</p>
+                <p className="text-xl sm:text-2xl font-bold text-purple-300 font-mono mt-1">{simulatedResults.beneficiaries}</p>
               </div>
             </div>
           </div>
@@ -316,9 +316,9 @@ export default function Home() {
       </section>
 
       {/* Highly Attractive GNN-LSTM Network Graph Visualizer */}
-      <section className="card bg-gradient-to-br from-slate-900/30 to-purple-950/10 border border-line p-8 md:p-12 relative overflow-hidden">
+      <section className="card bg-gradient-to-br from-slate-900/30 to-purple-950/10 border border-line p-5 sm:p-8 md:p-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-center">
           
           <div className="space-y-6">
             <div className="space-y-3">
@@ -356,10 +356,10 @@ export default function Home() {
           </div>
 
           {/* Dynamic SVG Connection Map */}
-          <div className="bg-slate-950/90 border border-line/60 rounded-2xl p-6 flex flex-col items-center justify-center relative shadow-inner">
+          <div className="bg-slate-950/90 border border-line/60 rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center relative shadow-inner">
             <p className="absolute top-3 left-3 text-[10px] font-mono text-slate-500">GNN Spatial Topology Graph</p>
             
-            <svg viewBox="0 0 320 240" className="w-full max-w-[340px] h-auto">
+            <svg viewBox="0 0 320 240" className="w-full max-w-[280px] sm:max-w-[340px] h-auto">
               
               {/* Draw Edges */}
               {nodes.map((node) =>
